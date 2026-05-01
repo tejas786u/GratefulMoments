@@ -13,9 +13,9 @@ struct MomentHexagonView: View {
     @State var layout: HexagonLayout = .standard
     
     var body: some View {
-        Hexagon(moment: moment, layout: layout, content: {
+        Hexagon(layout: layout, moment: moment){
             hexagonContent()
-        })
+        }
     }
     
     private var showImage: Bool {

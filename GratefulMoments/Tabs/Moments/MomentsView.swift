@@ -9,19 +9,26 @@ import SwiftUI
 import SwiftData
 
 struct MomentsView: View {
-    @State private var isShowCreateMoment: Bool = false
+    @State private var showCreateMoment = false
     @Query(sort: \Moment.timestamp)
-
     private var moments: [Moment]
+
     static let offsetAmount: CGFloat = 70.0
-    
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                pathItems
-                    .frame(maxWidth: .infinity)
+                LazyVStack(spacing: 8, pinnedViews: .sectionHeaders) {
+                    Section {
+                        pathItems
+                            .frame(maxWidth: .infinity)
+                    } header: {
+                        streakHeader
+                    }
+                    
+                }
             }
-            .overlay(alignment: .center, content: {
+            .overlay {
                 if moments.isEmpty {
                     ContentUnavailableView {
                         Label("No moments yet!", systemImage: "exclamationmark.circle.fill")
@@ -29,15 +36,15 @@ struct MomentsView: View {
                         Text("Post a note or photo to start filling this space with gratitude.")
                     }
                 }
-            })
+            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
-                        isShowCreateMoment = true
+                        showCreateMoment = true
                     } label: {
                         Image(systemName: "plus")
                     }
-                    .sheet(isPresented: $isShowCreateMoment) {
+                    .sheet(isPresented: $showCreateMoment) {
                         MomentEntryView()
                     }
                 }
@@ -48,7 +55,7 @@ struct MomentsView: View {
             .navigationTitle("Grateful Moments")
         }
     }
-    
+
     private var pathItems: some View {
         ForEach(moments.enumerated(), id: \.0) { index, moment in
             NavigationLink {
@@ -68,6 +75,20 @@ struct MomentsView: View {
             }
         }
     }
+    
+    @ViewBuilder private var streakHeader: some View {
+        let streak = StreakCalculator().calculateStreak(moments)
+        if streak > 0 {
+            HStack {
+                Text(verbatim: "\(streak)")
+                Text(Image(systemName: "flame.fill"))
+                    .foregroundStyle(.ember)
+                Spacer()
+            }
+            .font(.subheadline)
+            .padding()
+        }
+    }
 }
 
 #Preview {
@@ -75,7 +96,7 @@ struct MomentsView: View {
         .sampleDataContainer()
 }
 
-#Preview("No Moment") {
+#Preview("No moments") {
     MomentsView()
         .modelContainer(for: [Moment.self])
         .environment(DataContainer())

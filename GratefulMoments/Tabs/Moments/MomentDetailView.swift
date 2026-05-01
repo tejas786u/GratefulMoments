@@ -9,12 +9,14 @@ import SwiftUI
 import SwiftData
 
 struct MomentDetailView: View {
-    @State private var showConfirmation: Bool = false
-    @Environment(DataContainer.self) private var dataContainer
-    @Environment(\.dismiss) private var dismiss
     var moment: Moment
+    @State private var showConfirmation = false
+
+    @Environment(\.dismiss) private var dismiss
+    @Environment(DataContainer.self) private var dataContainer
+
     var body: some View {
-        ScrollView{
+        ScrollView {
             contentStack
         }
         .navigationTitle(moment.title)
@@ -25,7 +27,7 @@ struct MomentDetailView: View {
                 } label: {
                     Image(systemName: "trash")
                 }
-                .confirmationDialog("Are you sure?", isPresented: $showConfirmation) {
+                .confirmationDialog("Delete Moment", isPresented: $showConfirmation) {
                     Button("Delete Moment", role: .destructive) {
                         dataContainer.modelContext.delete(moment)
                         try? dataContainer.modelContext.save()
@@ -37,16 +39,26 @@ struct MomentDetailView: View {
             }
         }
     }
-    
+
     private var contentStack: some View {
         VStack(alignment: .leading) {
-            Text(moment.timestamp, style: .date)
-                .font(.subheadline)
-                .fontDesign(.rounded)
-            if !moment.note.isEmpty{
+            HStack {
+                Text(moment.timestamp, style: .date)
+                    .font(.subheadline)
+                Spacer()
+                ForEach(moment.badges) { badge in
+                    NavigationLink {
+                        BadgeDetailView(badge: badge)
+                    } label: {
+                        Image(badge.details.image)
+                            .resizable()
+                            .frame(width: 44, height: 44)
+                    }
+                }
+            }
+            if !moment.note.isEmpty {
                 Text(moment.note)
                     .textSelection(.enabled)
-                    .fontDesign(.rounded)
             }
             if let image = moment.image {
                 Image(uiImage: image)

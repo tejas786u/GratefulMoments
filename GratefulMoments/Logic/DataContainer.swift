@@ -16,43 +16,49 @@ import SwiftUI
 @MainActor
 class DataContainer {
     let modelContainer: ModelContainer
+    var badgeManager: BadgeManager
+
     var modelContext: ModelContext {
         modelContainer.mainContext
     }
+
     init(includeSampleMoments: Bool = false) {
         let schema = Schema([
-            Moment.self
+            Moment.self,
+            Badge.self
         ])
-        
+
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: includeSampleMoments)
-        
+
         do {
             modelContainer = try ModelContainer(for: schema, configurations: [modelConfiguration])
+            badgeManager = BadgeManager(modelContainer: modelContainer)
+            
+            try badgeManager.loadBadgesIfNeeded()
+
             if includeSampleMoments {
-                loadSampleMoments()
+                try loadSampleMoments()
             }
             try modelContext.save()
         } catch {
-            fatalError("Could not create model container : \(error.localizedDescription)")
+            fatalError("Could not create ModelContainer: \(error)")
         }
     }
-    
-    private func loadSampleMoments() {
+
+    private func loadSampleMoments() throws{
         for moment in Moment.sampleData {
             modelContext.insert(moment)
+            try badgeManager.unlockBadges(newMoment: moment)
         }
     }
 }
-
-/*
- With the .sampleDataContainer() convenience modifier, you don’t need to manually create a data container in every preview: You can add .sampleDataContainer() to provide your sample data. Marking the DataContainer class with @MainActor ensures that any interactions with the container from your views happen on the main thread, which is required for UI updates.
- */
 
 private let sampleContainer = DataContainer(includeSampleMoments: true)
 
 extension View {
     func sampleDataContainer() -> some View {
-        self.modelContainer(sampleContainer.modelContainer)
+        self
             .environment(sampleContainer)
+            .modelContainer(sampleContainer.modelContainer)
     }
 }

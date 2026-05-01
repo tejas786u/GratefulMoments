@@ -16,13 +16,16 @@ class Moment {
     var imageData: Data?
     var timestamp: Date
     
+    var badges: [Badge]
+
     init(title: String, note: String, imageData: Data? = nil, timestamp: Date = .now) {
         self.title = title
         self.note = note
         self.imageData = imageData
         self.timestamp = timestamp
+        self.badges = []
     }
-    
+
     var image: UIImage? {
         imageData.flatMap {
             UIImage(data: $0)
@@ -32,9 +35,9 @@ class Moment {
 
 extension Moment {
     static let sample = sampleData[0]
-    static let longTextData = sampleData[1]
+    static let longTextSample = sampleData[1]
     static let imageSample = sampleData[4]
-    
+
     static let sampleData = [
         Moment(
             title: "🍅🥳",
