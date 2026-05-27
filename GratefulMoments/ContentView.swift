@@ -20,8 +20,13 @@ struct ContentView: View {
     }
 }
 
-#Preview {
+#Preview("Light") {
     ContentView()
         .sampleDataContainer()
 }
 
+#Preview("Dark") {
+    ContentView()
+        .sampleDataContainer()
+        .preferredColorScheme(.dark)
+}

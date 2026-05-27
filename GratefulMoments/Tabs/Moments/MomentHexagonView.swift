@@ -11,6 +11,7 @@ struct MomentHexagonView: View {
     var moment: Moment
     
     @State var layout: HexagonLayout = .standard
+    @Environment(\.locale) private var locale
     
     var body: some View {
         Hexagon(layout: layout, moment: moment){
@@ -37,6 +38,7 @@ struct MomentHexagonView: View {
             }
             Text(moment.timestamp.formatted(
                 .dateTime
+                    .locale(locale)
                     .month(.abbreviated)
                     .day()
             ))
@@ -71,4 +73,14 @@ struct MomentHexagonView: View {
         MomentHexagonView(moment: Moment.sample)
         MomentHexagonView(moment: Moment.sample, layout: .large)
     }
+}
+
+#Preview("German Language") {
+    MomentHexagonView(moment: Moment.imageSample)
+        .environment(\.locale, Locale(identifier: "de"))
+}
+
+#Preview("English language, region Great Britian") {
+    MomentHexagonView(moment: Moment.imageSample)
+        .environment(\.locale, Locale(identifier: "en_GB"))
 }
